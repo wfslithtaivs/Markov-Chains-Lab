@@ -3,6 +3,7 @@
 
 from random import choice
 import re
+import sys
 
 
 def open_and_read_file(file_path):
@@ -100,8 +101,12 @@ def make_text(chains):
     # join words list into a string and return
     return " ".join(words)
 
+try:
+    input_path = sys.argv[1]
+except IndexError:
+    input_path = "green-eggs.txt"
+    print "Using default text file."
 
-input_path = "green-eggs.txt"
 
 # Open the file and turn it into one long string
 input_text = open_and_read_file(input_path)
