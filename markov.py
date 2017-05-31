@@ -77,6 +77,7 @@ def make_chains(text_string):
 
     return chains
 
+
 def produce_n_gram_dict(text_corpus):
     """Produce dictionary of n-grams"""
 
@@ -126,11 +127,6 @@ def make_text(chains):
     # join words list into a string and return
     return " ".join(words)
 
-try:
-    input_path = sys.argv[1]
-except IndexError:
-    input_path = "green-eggs.txt"
-    print "Using default text file."
 
 def make_large_text(dictionary):
     """Produce large text using n-grams"""
@@ -164,6 +160,12 @@ def make_large_text(dictionary):
     # join build_words words together for final output
     return " ".join(build_words)
 
+
+try:
+    input_path = sys.argv[1]
+except IndexError:
+    input_path = "green-eggs.txt"
+    print "Using default text file."
 
 # Open the file and turn it into one long string
 input_text = open_and_read_file(input_path)
