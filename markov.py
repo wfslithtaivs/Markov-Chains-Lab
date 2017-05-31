@@ -1,7 +1,7 @@
 """Generate markov text from text files.
 
     to run from command line:
-    python markov.py gettysburg.txt 5
+    python markov.py gettysburg.txt
 """
 
 
@@ -10,7 +10,7 @@ import re
 import sys
 
 # get n-gram size from command line input
-MAX_GRAM_SIZE = int(sys.argv[2])
+MAX_GRAM_SIZE = 5
 
 
 def open_and_read_file(file_path):
@@ -82,14 +82,20 @@ def produce_n_gram_dict(text_corpus):
     """Produce dictionary of n-grams"""
 
     n_dict = {}
+
+    for char in text_corpus:
+        if char in ["(", ")", "\"", "\'", "\'", "`", "_", "*", "__", "--"]:
+            text_corpus.replace(char,'')
+
     text_corpus = text_corpus.split()
 
     for n in range(2, MAX_GRAM_SIZE + 1):
         for i in range(len(text_corpus) - n):
             current_n_words = tuple(text_corpus[i:i+n])
-            existing_n_values = n_dict.get(current_n_words)
+
             next_word = [text_corpus[i + n]]
-            if existing_n_values == None:
+
+            if n_dict.get(current_n_words) is None:
                 n_dict[current_n_words] = next_word
             else:
                 n_dict[current_n_words] += next_word
@@ -161,6 +167,58 @@ def make_large_text(dictionary):
     return " ".join(build_words)
 
 
+def generate_tweet(dictionary):
+    """Generate random 140 chars tweet"""
+
+    while True:
+        current_seed = choice(dictionary.keys())
+        if len(current_seed) >= 3:
+            break
+
+    window_limit = len(current_seed)
+    window_size = window_limit
+
+    message = []
+    message.extend(current_seed)
+    message[0] = message[0].capitalize()
+
+    while True:
+        if window_size == 1:
+            break
+
+        current_n_gram = tuple(message[-1*window_size:])
+
+        try:
+            next_word = choice(dictionary[current_n_gram])
+            if (len(" ".join(message)) + len(next_word) + 2) > 140:
+                return output_message(message)
+            else:
+                message.append(next_word)
+                window_size = window_limit
+        except KeyError:
+            window_size -= 1
+            continue
+
+    return output_message(message)
+
+
+def output_message(message_list):
+
+    result = " ".join(message_list)
+
+    if result[-1] in ["!", "?", "."]:
+        return result
+    elif result[-1] in [",", "-", " ", ":", ";"]:
+        return result[:-1] + "."
+    elif result[-2:] is "--":
+        return result[:-2] + "."
+    else:
+        return result + "."
+
+
+
+# ------------ Body ----------------- #
+
 try:
     input_path = sys.argv[1]
 except IndexError:
@@ -171,23 +229,26 @@ except IndexError:
 input_text = open_and_read_file(input_path)
 
 # Get a Markov chain
-chains = make_chains(input_text)
+# chains = make_chains(input_text)
 
 n_grams = produce_n_gram_dict(input_text)
 
-for item, value in n_grams.items():
-    print item, "-", value
+# for item, value in n_grams.items():
+#     print item, "-", value
 
 # Produce random text
-random_text = make_text(chains)
+#random_text = make_text(chains)
 
-large_random_text = make_large_text(n_grams)
+#large_random_text = make_large_text(n_grams)
 
-print large_random_text
+message_tweet = generate_tweet(n_grams)
+print message_tweet
+
+# print large_random_text
 
 # try a list comprehension
-# texts = [make_text(chains) for i in range(25)]
-
-# for text in texts:
-#     print text
-#     print
+texts = [generate_tweet(n_grams) for i in range(25)]
+print
+for text in texts:
+    print text
+    print
