@@ -106,3 +106,11 @@ def tweet(file_name = "green-eggs.txt"):
     input_text = open_and_read_file(file_name)
     n_grams = produce_n_gram_dict(input_text)
     return generate_tweet(n_grams)
+
+if __name__ == '__main__':
+    try:
+        text_path = sys.argv[1]
+    except IndexError:
+        text_path = "join.txt"
+
+    print tweet(text_path)
