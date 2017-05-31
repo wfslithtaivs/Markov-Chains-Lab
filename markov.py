@@ -21,10 +21,7 @@ def open_and_read_file(file_path):
     the file's contents as one string of text.
     """
 
-    # your code goes here
-
     f = open(file_path)
-
     return f.read()
 
 
@@ -51,6 +48,7 @@ def produce_n_gram_dict(text_corpus):
                 n_dict[current_n_words] += next_word
 
     return n_dict
+
 
 def generate_tweet(dictionary):
     """Generate random 140 chars tweet"""
