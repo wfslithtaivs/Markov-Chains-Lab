@@ -1,9 +1,16 @@
-"""Generate markov text from text files."""
+"""Generate markov text from text files.
+
+    to run from command line:
+    python markov.py gettysburg.txt 5
+"""
 
 
 from random import choice
 import re
 import sys
+
+# get n-gram size from command line input
+MAX_GRAM_SIZE = int(sys.argv[2])
 
 
 def open_and_read_file(file_path):
@@ -70,6 +77,24 @@ def make_chains(text_string):
 
     return chains
 
+def produce_n_gram_dict(text_corpus):
+    """Produce dictionary of n-grams"""
+
+    n_dict = {}
+    text_corpus = text_corpus.split()
+
+    for n in range(2, MAX_GRAM_SIZE + 1):
+        for i in range(len(text_corpus) - n):
+            current_n_words = tuple(text_corpus[i:i+n])
+            existing_n_values = n_dict.get(current_n_words)
+            next_word = [text_corpus[i + n]]
+            if existing_n_values == None:
+                n_dict[current_n_words] = next_word
+            else:
+                n_dict[current_n_words] += next_word
+
+    return n_dict
+
 
 def make_text(chains):
     """Returns text from chains."""
@@ -107,6 +132,38 @@ except IndexError:
     input_path = "green-eggs.txt"
     print "Using default text file."
 
+def make_large_text(dictionary):
+    """Produce large text using n-grams"""
+
+    build_words = []
+    # set gram window size to n-gram size previously specified
+    window_size = MAX_GRAM_SIZE
+    # initial text for markov chains to build on
+    build_words.extend(('Alice', 'was', 'beginning', 'to', 'get'))
+
+    while True:
+        # if reducing window size reaches 1 (unigram), no more predictions avail
+        if window_size == 1:
+            break
+        # window size slice from end of build_words, includes newest added word
+        current_n_gram = tuple(build_words[-1*window_size:])
+        # if valid predictions from current chain, append random next word
+        # reset window size to initial size to get optimal prediction with new information
+        try:
+            next_word = choice(dictionary[current_n_gram])
+            build_words.append(next_word)
+            window_size = MAX_GRAM_SIZE
+
+            # print build_words
+            # raw_input()
+        # no valid predictions found for n-size grams, reduce window size by 1 and check again
+        except KeyError:
+            window_size -= 1
+            continue
+
+    # join build_words words together for final output
+    return " ".join(build_words)
+
 
 # Open the file and turn it into one long string
 input_text = open_and_read_file(input_path)
@@ -114,17 +171,21 @@ input_text = open_and_read_file(input_path)
 # Get a Markov chain
 chains = make_chains(input_text)
 
-# for item, value in chains.items():
-#     print item, "-", value
+n_grams = produce_n_gram_dict(input_text)
+
+for item, value in n_grams.items():
+    print item, "-", value
 
 # Produce random text
 random_text = make_text(chains)
 
-#print random_text
+large_random_text = make_large_text(n_grams)
+
+print large_random_text
 
 # try a list comprehension
-texts = [make_text(chains) for i in range(25)]
+# texts = [make_text(chains) for i in range(25)]
 
-for text in texts:
-    print text
-    print
+# for text in texts:
+#     print text
+#     print
