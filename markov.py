@@ -75,7 +75,7 @@ def generate_tweet(dictionary):
 
         try:
             next_word = choice(dictionary[current_n_gram])
-            if (len(" ".join(message)) + len(next_word) + 2) > 140:
+            if (len(" ".join(message)) + len(next_word) + 12) > 140:
                 return output_message(message)
             else:
                 message.append(next_word)
@@ -93,13 +93,15 @@ def output_message(message_list):
     result = " ".join(message_list)
 
     if result[-1] in ["!", "?", "."]:
-        return result
-    elif result[-1] in [",", "-", " ", ":", ";"]:
-        return result[:-1] + "."
+        return result + " #aug17kat"
+    if result[-1] in [",", "-", " ", ":", ";"]:
+        result = result[:-1] + "."
     elif result[-2:] is "--":
-        return result[:-2] + "."
+        result = result[:-2] + "."
     else:
-        return result + "."
+        result += "."
+
+    return result + " #aug17kat"
 
 
 def tweet(file_name = "green-eggs.txt"):
@@ -126,3 +128,5 @@ if __name__ == '__main__':
         text_path = "join.txt"
 
     print tweet(text_path)
+
+# #aug17kat
