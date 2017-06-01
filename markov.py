@@ -4,10 +4,12 @@
     python markov.py gettysburg.txt
 """
 
-
+import os
 from random import choice
 import re
 import sys
+import twitter
+
 
 # get n-gram size from command line input
 
@@ -105,7 +107,17 @@ def tweet(file_name = "green-eggs.txt"):
 
     input_text = open_and_read_file(file_name)
     n_grams = produce_n_gram_dict(input_text)
-    return generate_tweet(n_grams)
+
+    api = twitter.Api(
+        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+        consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+        access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+        access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
+
+    twt = generate_tweet(n_grams)
+    status = api.PostUpdate(twt)
+    return twt
+
 
 if __name__ == '__main__':
     try:
