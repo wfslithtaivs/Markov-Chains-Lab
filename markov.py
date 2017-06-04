@@ -5,7 +5,7 @@
 """
 
 import os
-from random import choice
+import choice
 import re
 import sys
 import twitter
@@ -23,66 +23,53 @@ def open_and_read_file(file_path):
     the file's contents as one string of text.
     """
 
-    f = open(file_path)
-    return f.read()
-
+    with open(file_path, 'r') as f:
+        return f.read()
 
 def produce_n_gram_dict(text_corpus):
     """Produce dictionary of n-grams"""
 
-    n_dict = {}
-
-    for char in text_corpus:
-        if char in ["(", ")", "\"", "\'", "\'", "`", "_", "*", "__", "--", "[", "]"]:
-            text_corpus.replace(char,'')
+    for ch in ["(", ")", "\"", "\'", "\'", "`", "_", "*", "__", "--", "[", "]"]:
+        text_corpus = text_corpus.replace(ch, '')
 
     text_corpus = text_corpus.split()
 
+    n_dict = {}
     for n in range(2, MAX_GRAM_SIZE + 1):
         for i in range(len(text_corpus) - n):
             current_n_words = tuple(text_corpus[i:i+n])
-
-            next_word = [text_corpus[i + n]]
-
-            if n_dict.get(current_n_words) is None:
-                n_dict[current_n_words] = next_word
-            else:
-                n_dict[current_n_words] += next_word
+            next_word = text_corpus[i + n]
+            n_dict.setdefault(current_n_words, []).append(next_word)
 
     return n_dict
 
 
-def generate_tweet(dictionary):
+def generate_tweet(n_dict):
     """Generate random 140 chars tweet"""
 
     while True:
-        current_seed = choice(dictionary.keys())
+        current_seed = random.choice(n_dict.keys())
         if len(current_seed) >= 3:
             break
 
     window_limit = len(current_seed)
     window_size = window_limit
 
-    message = []
-    message.extend(current_seed)
+    message = list(current_seed)
     message[0] = message[0].capitalize()
 
-    while True:
-        if window_size == 1:
-            break
+    while window_size > 1:
+        current_n_gram = tuple(message[-window_size:])
 
-        current_n_gram = tuple(message[-1*window_size:])
+        if current_n_gram in n_dict:
+            next_word = random.choice(n_dict[current_n_gram])
+            if len(" ".join(message)) + len(next_word) + 12 > 140:
+                break
 
-        try:
-            next_word = choice(dictionary[current_n_gram])
-            if (len(" ".join(message)) + len(next_word) + 12) > 140:
-                return output_message(message)
-            else:
-                message.append(next_word)
-                window_size = window_limit
-        except KeyError:
+            message.append(next_word)
+            window_size = window_limit
+        else:
             window_size -= 1
-            continue
 
     return output_message(message)
 
@@ -92,13 +79,11 @@ def output_message(message_list):
 
     result = " ".join(message_list)
 
-    if result[-1] in ["!", "?", "."]:
-        return result + " #aug17kat"
-    if result[-1] in [",", "-", " ", ":", ";"]:
+    if result[-1:] in [",", "-", " ", ":", ";"]:
         result = result[:-1] + "."
-    elif result[-2:] is "--":
+    elif result[-2:] == "--":
         result = result[:-2] + "."
-    else:
+    elif result[-1:] not in ["!", "?", "."]:
         result += "."
 
     return result + " #aug17kat"
@@ -122,11 +107,7 @@ def tweet(file_name = "green-eggs.txt"):
 
 
 if __name__ == '__main__':
-    try:
-        text_path = sys.argv[1]
-    except IndexError:
-        text_path = "join.txt"
-
+    text_path = sys.argv[1] if len(sys.argv) >= 2 else "join.txt"
     print tweet(text_path)
 
 # #aug17kat

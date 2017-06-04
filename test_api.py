@@ -1,9 +1,6 @@
-from markov import tweet
+import markov
 import sys
 
-try:
-    text_path = sys.argv[1]
-except IndexError:
-    text_path = "join.txt"
+text_path = sys.argv[1] if len(sys.argv) >= 2 else "join.txt"
 
-print tweet(text_path)
+print markov.tweet(text_path)
